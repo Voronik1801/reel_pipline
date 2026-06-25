@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Проверка окружения для reel-пайплайна. Запуск: bash pipeline_check.sh
+set -u
+ok(){ printf "  ✅ %s\n" "$1"; }
+no(){ printf "  ❌ %s — %s\n" "$1" "$2"; FAIL=1; }
+FAIL=0
+echo "== Инструменты =="
+command -v ffmpeg  >/dev/null && ok "ffmpeg"  || no "ffmpeg"  "brew install ffmpeg"
+command -v ffprobe >/dev/null && ok "ffprobe" || no "ffprobe" "идёт с ffmpeg"
+command -v whisper >/dev/null && ok "whisper (openai)" || no "whisper" "pip install -U openai-whisper"
+command -v avconvert >/dev/null && ok "avconvert (Apple HDR→SDR)" || no "avconvert" "только macOS; цвет iPhone недоступен"
+python3 -c "import PIL" 2>/dev/null && ok "Pillow (субтитры)" || no "Pillow" "pip install pillow"
+python3 -c "import numpy" 2>/dev/null && ok "numpy" || no "numpy" "pip install numpy"
+echo "== Ассеты =="
+[ -f assets/fonts/Unbounded.ttf ] && ok "шрифт Unbounded" || no "Unbounded.ttf" "положи в assets/fonts/"
+[ -d assets/stickers ] && ok "стикеры ($(ls assets/stickers/*.png 2>/dev/null|wc -l|tr -d ' ') шт)" || no "assets/stickers/" "маскоты для обложек"
+echo "== Папки =="
+for d in raw transcripts plan cut; do
+  if [ -d "$d" ]; then ok "$d/"; else mkdir -p "$d"; ok "$d/ (создана)"; fi
+done
+echo ""
+[ $FAIL -eq 0 ] && echo "✅ Окружение готово." || echo "⚠️  Есть пропуски — см. выше."

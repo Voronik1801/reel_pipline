@@ -1,0 +1,14 @@
+# Личное — НЕ коммитить
+raw/
+raw_sdr/
+transcripts/
+plan/
+cut/
+*.MOV
+*.mov
+*.mp4
+*.wav
+*.session
+build_2*.py
+make_reel_2*.py
+merge_*.py
